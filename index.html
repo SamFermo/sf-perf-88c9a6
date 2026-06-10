@@ -60,6 +60,12 @@
 
   <div class="kpis" id="kpis"></div>
 
+  <div class="card" style="padding:12px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+    <b style="font-size:13.5px">1:1 view</b>
+    <select id="coachSel" style="font:inherit;font-size:13px;padding:5px 8px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink)"></select>
+    <span class="small">For sit-downs: one server's numbers against an anonymized floor band, peer names hidden. Floor view shows everything.</span>
+  </div>
+
   <h2>Server scorecard — 14-month aggregate</h2>
   <p class="sub">Check average is the per-table upsell metric (sales &divide; checks). SPLH is sales per clocked labor hour. Click any column to sort.</p>
   <div class="card" style="overflow-x:auto">
@@ -92,14 +98,14 @@
     <div class="chartbox"><canvas id="trendChart"></canvas></div>
     <p class="small" style="margin-top:8px">Jackie started Aug 2025. Adrian's May 2026 point is excluded everywhere: $698 average on 34 checks, likely inflated by the farm-dinner wine pass-through ($3,321 of Open Wine rung that month) plus large-party rings, not floor service. Feb&ndash;Mar 2026 is the kitchen-floor closure.</p>
   </div>
-  <div class="read"><b>What it says:</b> the rank order barely moves. Jackie, Allegra and Sully sit at the top of the check-average board nearly every month they work; Brittany and Abby sit at the bottom of it nearly every month. Month-to-month wobble is about &plusmn;10% around each server's own level, so a single soft month is noise, but the gaps between servers are structural. The coaching question isn't "who had a bad month," it's "what do the top three do per table that the bottom two don't."</div>
+  <div class="read" id="trendRead"><b>What it says:</b> the rank order barely moves. Jackie, Allegra and Sully sit at the top of the check-average board nearly every month they work; Brittany and Abby sit at the bottom of it nearly every month. Month-to-month wobble is about &plusmn;10% around each server's own level, so a single soft month is noise, but the gaps between servers are structural. The coaching question isn't "who had a bad month," it's "what do the top three do per table that the bottom two don't."</div>
 
   <h2>Labor — sales per clocked hour</h2>
   <p class="sub">14-month aggregate, floor sellers. Manager rows shown for completeness, not comparison.</p>
   <div class="card">
     <div class="chartbox" style="height:280px"><canvas id="splhChart"></canvas></div>
   </div>
-  <div class="read"><b>How to read it:</b> the spread is wide, $155 to $365 per clocked hour, and it tracks section size and shift count more than selling skill. Denise, Jackie and Julian carry the heaviest load per hour on the floor. Brittany's $155 is the outlier on the low side; before reading that as performance, check whether her clocked hours include sidework or opening duties the others don't carry. Caveat that applies to every number here: these are Revel clocked hours and POS wages only, useful for comparing servers against each other, not valid against the house 30&ndash;35% labor target (true payroll runs well above POS wages).</div>
+  <div class="read" id="laborRead"><b>How to read it:</b> the spread is wide, $155 to $365 per clocked hour, and it tracks section size and shift count more than selling skill. Denise, Jackie and Julian carry the heaviest load per hour on the floor. Brittany's $155 is the outlier on the low side; before reading that as performance, check whether her clocked hours include sidework or opening duties the others don't carry. Caveat that applies to every number here: these are Revel clocked hours and POS wages only, useful for comparing servers against each other, not valid against the house 30&ndash;35% labor target (true payroll runs well above POS wages).</div>
 
   <h2>Wine module</h2>
   <p class="sub">Multi-year shape (Mezzanine, 2022&ndash;2026) and the 14-month clean detail (Revel).</p>
@@ -171,6 +177,16 @@ const servers=[
  {name:'Katie Kuntz',  avg:129.94,sales:185287,checks:1426,qpc:5.34,splh:100.5,wine:22393,winePct:15.1,btlRatio:0.73,role:'bar',star:false}
 ];
 
+// ---- 1:1 coach mode ----
+let coach=null;
+const FLOOR_NAMES=servers.filter(s=>s.role==='srv').map(s=>s.name);
+function medianOf(a){const s=[...a].sort((x,y)=>x-y);const m=Math.floor(s.length/2);return s.length%2?s[m]:(s[m-1]+s[m])/2;}
+function floorMedianRow(){
+ const fl=servers.filter(s=>s.role==='srv');
+ const med=k=>medianOf(fl.map(s=>s[k]));
+ return {name:'Floor median',avg:med('avg'),sales:med('sales'),checks:Math.round(med('checks')),qpc:med('qpc'),splh:med('splh'),wine:med('wine'),winePct:med('winePct'),btlRatio:med('btlRatio'),role:null,star:false};
+}
+
 // ---- Wine module data (Mezzanine + Revel, from seed session 6/7) ----
 const years=[
  {y:'2022',btg:280052,btb:253956},
@@ -206,9 +222,11 @@ const tbody=document.querySelector('#srvTable tbody');
 const maxAvg=Math.max(...servers.map(s=>s.avg));
 function rolecls(r){return r==='mgr'?'p-mgr':r==='bar'?'p-bar':'p-srv'}
 function render(){
- const rows=[...servers].sort((a,b)=>{const x=a[sortK],y=b[sortK];return (typeof x==='string'?x.localeCompare(y):x-y)*sortDir;});
+ let rows;
+ if(coach){rows=[servers.find(s=>s.name===coach),floorMedianRow()];}
+ else rows=[...servers].sort((a,b)=>{const x=a[sortK],y=b[sortK];return (typeof x==='string'?x.localeCompare(y):x-y)*sortDir;});
  tbody.innerHTML=rows.map(s=>`<tr>
-   <td>${s.name} <span class="pill ${rolecls(s.role)}">${s.role}</span>${s.star?' <span class="star" title="strong bottle-seller">★</span>':''}</td>
+   <td>${s.name}${s.role?` <span class="pill ${rolecls(s.role)}">${s.role}</span>`:''}${s.star?' <span class="star" title="strong bottle-seller">★</span>':''}</td>
    <td class="bar-cell"><span class="b" style="width:${s.avg/maxAvg*100}%"></span><span>$${s.avg.toFixed(0)}</span></td>
    <td>${fmtK(s.sales)}</td>
    <td>${s.checks.toLocaleString()}</td>
@@ -250,17 +268,40 @@ Object.keys(SRV_MONTHLY).forEach(n=>{
  chipBox.appendChild(c);
 });
 let trendChart=null;
+function bandFor(){
+ const peers=FLOOR_NAMES.filter(n=>n!==coach);
+ const lo=[],hi=[],md=[];
+ MONTHS.forEach((_,i)=>{
+  const vals=peers.map(n=>{const s=seriesFor(n);return s[i];}).filter(v=>v!==null&&v!==undefined);
+  if(!vals.length){lo.push(null);hi.push(null);md.push(null);return;}
+  lo.push(Math.min(...vals));hi.push(Math.max(...vals));md.push(Math.round(medianOf(vals)*100)/100);
+ });
+ return {lo,hi,md};
+}
 function drawTrend(){
- const names=[...onSet];
- const ds=names.map(n=>({label:n.split(' ')[0],data:seriesFor(n),borderColor:PALETTE[n],backgroundColor:PALETTE[n],tension:.3,pointRadius:2.5,spanGaps:true}));
+ let names,ds;
+ if(coach){
+  const b=bandFor();
+  names=[coach,coach,coach,coach];
+  ds=[
+   {label:'Floor high',data:b.hi,borderColor:'rgba(154,160,166,.0)',backgroundColor:'rgba(154,160,166,.18)',pointRadius:0,fill:'+1',tension:.3,spanGaps:true},
+   {label:'Floor low',data:b.lo,borderColor:'rgba(154,160,166,.0)',backgroundColor:'rgba(154,160,166,.18)',pointRadius:0,fill:false,tension:.3,spanGaps:true},
+   {label:'Floor median',data:b.md,borderColor:'#9aa0a6',borderDash:[5,4],pointRadius:0,tension:.3,spanGaps:true},
+   {label:coach.split(' ')[0],data:seriesFor(coach),borderColor:'#7c2b3b',backgroundColor:'#7c2b3b',tension:.3,pointRadius:3,spanGaps:true}
+  ];
+ } else {
+  names=[...onSet];
+  ds=names.map(n=>({label:n.split(' ')[0],data:seriesFor(n),borderColor:PALETTE[n],backgroundColor:PALETTE[n],tension:.3,pointRadius:2.5,spanGaps:true}));
+ }
  const yFmt = metric==='sales' ? (v=>'$'+v/1000+'K') : (v=>'$'+v);
  if(trendChart) trendChart.destroy();
  trendChart=new Chart(document.getElementById('trendChart'),{
   type:'line',
   data:{labels:MONTHS,datasets:ds},
   options:{responsive:true,maintainAspectRatio:false,
-   plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>{
-     const m=SRV_MONTHLY[names[c.datasetIndex]][c.dataIndex];
+   plugins:{legend:{display:false},tooltip:{filter:c=>!coach||c.datasetIndex>=2,callbacks:{label:c=>{
+     const isCoachLine=!coach||c.datasetIndex===3;
+     const m=isCoachLine?SRV_MONTHLY[names[c.datasetIndex]][c.dataIndex]:null;
      const extra=m?` (${m[1]} checks)`:'';
      return c.dataset.label+': '+(metric==='sales'?fmt0(c.raw):'$'+c.raw)+extra;}}}},
    scales:{x:{grid:{display:false}},y:{ticks:{callback:yFmt}}}}
@@ -275,15 +316,30 @@ drawTrend();
 // ---- SPLH chart ----
 const floorS=servers.filter(s=>s.role==='srv').sort((a,b)=>b.splh-a.splh);
 const mgrS=servers.filter(s=>s.role!=='srv');
-new Chart(document.getElementById('splhChart'),{
- type:'bar',
- data:{labels:[...floorS,...mgrS].map(s=>s.name.split(' ')[0]),
-  datasets:[{label:'SPLH',data:[...floorS,...mgrS].map(s=>s.splh),
-   backgroundColor:[...floorS.map(()=> 'rgba(124,43,59,.75)'),...mgrS.map(()=> 'rgba(154,160,166,.55)')]}]},
- options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},
-  tooltip:{callbacks:{label:c=>'$'+c.raw.toFixed(0)+' / clocked hr'+(c.dataIndex>=floorS.length?' (mgr hours, not comparable)':'')}}},
-  scales:{x:{grid:{display:false}},y:{ticks:{callback:v=>'$'+v}}}}
-});
+let splhC=null;
+function drawSplh(){
+ const all=coach?floorS:[...floorS,...mgrS];
+ const labels=all.map(s=>coach?(s.name===coach?s.name.split(' ')[0]:'·'):s.name.split(' ')[0]);
+ const colors=all.map((s,i)=>coach?(s.name===coach?'rgba(124,43,59,.85)':'rgba(154,160,166,.35)'):(i<floorS.length?'rgba(124,43,59,.75)':'rgba(154,160,166,.55)'));
+ if(splhC)splhC.destroy();
+ splhC=new Chart(document.getElementById('splhChart'),{
+  type:'bar',
+  data:{labels:labels,datasets:[{label:'SPLH',data:all.map(s=>s.splh),backgroundColor:colors}]},
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},
+   tooltip:{filter:c=>!coach||all[c.dataIndex].name===coach,callbacks:{label:c=>'$'+c.raw.toFixed(0)+' / clocked hr'+(!coach&&c.dataIndex>=floorS.length?' (mgr hours, not comparable)':'')}}},
+   scales:{x:{grid:{display:false}},y:{ticks:{callback:v=>'$'+v}}}}
+ });
+}
+drawSplh();
+// coach selector wiring
+const coachSel=document.getElementById('coachSel');
+coachSel.innerHTML='<option value="">Floor view (everyone)</option>'+servers.map(s=>`<option value="${s.name}">${s.name}</option>`).join('');
+coachSel.onchange=()=>{
+ coach=coachSel.value||null;
+ document.getElementById('chips').style.display=coach?'none':'flex';
+ ['kpis','trendRead','laborRead'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display=coach?'none':'';});
+ render();drawTrend();drawSplh();
+};
 
 // ---- Wine charts ----
 new Chart(document.getElementById('yearChart'),{
