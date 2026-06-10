@@ -90,7 +90,7 @@
     </div>
     <div class="chips" id="chips"></div>
     <div class="chartbox"><canvas id="trendChart"></canvas></div>
-    <p class="small" style="margin-top:8px">Jackie started Aug 2025. Adrian's May 2026 point is excluded everywhere: $698 average on 34 checks, which reads as large-party or event rings, not floor service (unverified, worth a look in order history if it matters). Feb&ndash;Mar 2026 is the kitchen-floor closure.</p>
+    <p class="small" style="margin-top:8px">Jackie started Aug 2025. Adrian's May 2026 point is excluded everywhere: $698 average on 34 checks, likely inflated by the farm-dinner wine pass-through ($3,321 of Open Wine rung that month) plus large-party rings, not floor service. Feb&ndash;Mar 2026 is the kitchen-floor closure.</p>
   </div>
   <div class="read"><b>What it says:</b> the rank order barely moves. Jackie, Allegra and Sully sit at the top of the check-average board nearly every month they work; Brittany and Abby sit at the bottom of it nearly every month. Month-to-month wobble is about &plusmn;10% around each server's own level, so a single soft month is noise, but the gaps between servers are structural. The coaching question isn't "who had a bad month," it's "what do the top three do per table that the bottom two don't."</div>
 
@@ -116,12 +116,12 @@
   <div class="read"><b>Sam's read (Jun 2026):</b> for any bottle question above roughly <b>$120</b>, get Adrian to the table first. The data agrees with the gut: nobody on the floor is close to his bottle weighting, and the seed-session SKU scrape showed the floor selling almost entirely in the house / glass-pour tier (avg bottle $66&ndash;79) while Adrian's average bottle was $227. The practical lever is a tighter list everyone knows, so the floor can hold its own up to $120 and the handoff to Adrian gets reserved for true reserve-list calls.</div>
 
   <h2>Bottle mix — what's selling, month to month</h2>
-  <p class="sub">Every bottle SKU from Revel product mix, May 2025 &ndash; Jun 2026, grouped by price band: house under $70, mid $70&ndash;119, reserve $120+ (the Adrian handoff line). "Open Wine" is the manual-ring catch-all, shown separately.</p>
+  <p class="sub">Every bottle SKU from Revel product mix, May 2025 &ndash; Jun 2026, grouped by price band: house under $70, mid $70&ndash;119, reserve $120+ (the Adrian handoff line). "Open Wine" is the farm-dinner wine pass-through (wine bought and sold to Swan House), not restaurant guest sales; shown separately.</p>
   <div class="card">
     <div class="chartbox" style="height:300px"><canvas id="btlMixChart"></canvas></div>
-    <div class="legend"><span><span class="dot" style="background:#c08a3e"></span>House &lt;$70</span><span><span class="dot" style="background:#a04545"></span>Mid $70&ndash;119</span><span><span class="dot" style="background:#7c2b3b"></span>Reserve $120+</span><span><span class="dot" style="background:#9aa0a6"></span>Open Wine (manual)</span></div>
+    <div class="legend"><span><span class="dot" style="background:#c08a3e"></span>House &lt;$70</span><span><span class="dot" style="background:#a04545"></span>Mid $70&ndash;119</span><span><span class="dot" style="background:#7c2b3b"></span>Reserve $120+</span><span><span class="dot" style="background:#9aa0a6"></span>Open Wine (farm)</span></div>
   </div>
-  <div class="read"><b>What it says:</b> house bottles are half the program and move with covers, peaking in summer. The mid band is the steady second engine. The reserve band ($120+) runs $1.4&ndash;3.9K a month, about 15% of bottle dollars, and it does <b>not</b> swell in summer the way house does, consistent with it depending on one person's table visits rather than traffic. Two flags in the Open Wine line: Jul&ndash;Sep 2025 it ran $3.9&ndash;5.7K a month, then collapsed to noise from October, which looks like a ringing-discipline fix. And May 2026 spiked again, $3,321 on just 6 rings ($553 average); that is probably a chunk of Adrian's $698-average May and worth a one-time look at what those 6 rings were.</div>
+  <div class="read"><b>What it says:</b> house bottles are half the program and move with covers, peaking in summer. The mid band is the steady second engine. The reserve band ($120+) runs $1.4&ndash;3.9K a month, about 15% of bottle dollars, and it does <b>not</b> swell in summer the way house does, consistent with it depending on one person's table visits rather than traffic. The Open Wine line is the farm-dinner wine pass-through, and its shape confirms it: $3.9&ndash;5.7K a month through the Jul&ndash;Sep 2025 dinner season, quiet over winter, back in May 2026 as the new season opened. Read restaurant bottle performance from the three list bands; Open Wine is farm revenue riding through the POS.</div>
   <div class="card" style="overflow-x:auto">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">
       <label class="small" for="btlMonth">Window:</label>
@@ -140,7 +140,7 @@
       </tr></thead>
       <tbody></tbody>
     </table>
-    <p class="small" style="margin-top:10px">Full SKU list. Click a column to sort; pick a month or the full 14-month window above. Bands: house &lt;$70, mid $70&ndash;119, reserve $120+ on the row's average price; Open Wine, Corkage and Wine $20 are manual/non-list rings. Months-on-list counts across the whole window regardless of view. Spelt and House Red alone are a third of bottle volume; list rotation shows in that column (Via Alpina Aug&ndash;Oct 2025 only; Sancerre, Vermentino, Cerasuolo from the spring 2026 list). SKU name variants merged. Raw pull: data/bottle-mix-monthly-14mo.json.</p>
+    <p class="small" style="margin-top:10px">Full SKU list. Click a column to sort; pick a month or the full 14-month window above. Bands: house &lt;$70, mid $70&ndash;119, reserve $120+ on the row's average price; Corkage and Wine $20 are non-list rings; Open Wine is the farm-dinner pass-through. Months-on-list counts across the whole window regardless of view. Spelt and House Red alone are a third of bottle volume; list rotation shows in that column (Via Alpina Aug&ndash;Oct 2025 only; Sancerre, Vermentino, Cerasuolo from the spring 2026 list). SKU name variants merged. Raw pull: data/bottle-mix-monthly-14mo.json.</p>
   </div>
 
   <div class="foot" id="foot"></div>
@@ -358,7 +358,7 @@ function btlRender(){
  document.querySelector('#btlTable tbody').innerHTML=rows.map((r,i)=>`<tr>
   <td style="text-align:right;color:var(--muted)">${i+1}</td>
   <td>${r.name}</td>
-  <td>${r.band==='manual'?'<span class="small">manual</span>':`<span class="pill ${bandCls[r.band]}">${r.band}</span>`}</td>
+  <td>${r.band==='manual'?'<span class="small">farm</span>':`<span class="pill ${bandCls[r.band]}">${r.band}</span>`}</td>
   <td>${fmt0(r.dol)}</td>
   <td>${r.qty}</td>
   <td>$${r.avg.toFixed(0)}</td>
@@ -378,7 +378,7 @@ btlRender();
 
 document.getElementById('foot').innerHTML=`
  <b>Sources &amp; method.</b> Per-server monthly: live Revel pull (employee_profit JSON, business-day windows 03:00&ndash;03:00), May 2025&ndash;Jun 2026, pulled 06/09/2026, June partial through 6/8 service. Bottle mix: Revel product_mix per-SKU (product_class=5), same windows, pulled 06/10/2026. Wine per server: Revel product_mix pulled 06/07/2026. Multi-year wine: Mezzanine (Grady) dashboards.<br>
- <b>Caveats.</b> Sales attribute to the ringing employee; split checks and bar-rung items shift attribution slightly. SPLH and labor use Revel clocked hours and POS wages only, which understate true labor cost; valid for server-to-server comparison, not for house labor %. Wine % uses product-mix sales as denominator (excludes service charge) so it differs from the check-average basis. Adrian works manager shifts and larger parties; his check average and SPLH aren't like-for-like with floor servers. Months under 30 checks are dropped from trend lines. Raw pull: data/revel-server-monthly-14mo.json.`;
+ <b>Caveats.</b> Sales attribute to the ringing employee; split checks and bar-rung items shift attribution slightly. SPLH and labor use Revel clocked hours and POS wages only, which understate true labor cost; valid for server-to-server comparison, not for house labor %. Wine % uses product-mix sales as denominator (excludes service charge) so it differs from the check-average basis. Adrian works manager shifts and larger parties; his check average and SPLH aren't like-for-like with floor servers. Months under 30 checks are dropped from trend lines. Wine Bottles dollars include the farm-dinner pass-through (Open Wine, ~$23K across the window, concentrated in dinner season); per-server wine and bottle-ratio figures credit those rings to whoever rang them. Raw pull: data/revel-server-monthly-14mo.json.`;
 </script>
 </body>
 </html>
